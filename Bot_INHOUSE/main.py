@@ -99,7 +99,7 @@ async def leave_command(interaction: discord.Interaction, mod: str):
 
 @client.tree.command(name="qstatus", description="Affiche les membres dans la file d'attente (1v1 / 2v2 / 3v3)")
 async def status_command(interaction: discord.Interaction, mod: str):
-    if mod != "1v1" and mod != "2v2" and mod != "3v3":
+    if mod != "1v1" and mod != "2v2" and mod != "3v3" and mod != "all":
         await interaction.response.send_message("Argument invalide (1v1 ou 2v2 ou 3v3)", ephemeral=True)
     else:
         await display_status(interaction, mod)

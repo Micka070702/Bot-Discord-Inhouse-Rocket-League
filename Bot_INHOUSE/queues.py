@@ -53,7 +53,7 @@ async def _queue_3v3(interaction: discord.Interaction, client, clear_queue, queu
 async def send_is_full_message(interaction, client, clear_queue, queue_list, mod):
     participants = " ".join([f"<@{user_id}>" for user_id in queue_list])
 
-    embed = discord.Embed(title=f"Nous avons atteint les {len(queue_list)} membres dans la queue {mod}!", description="Les logs vous sont envoyé en MP", color=discord.Color.purple(), timestamp=datetime.datetime.utcnow())
+    embed = discord.Embed(title=f"Nous avons atteint les {len(queue_list)} membres dans la queue {mod}!", description="Les logs vous sont envoyés en MP", color=discord.Color.purple(), timestamp=datetime.datetime.utcnow())
     embed.add_field(name="Membres participants: ", value=participants, inline=False)
 
     game_creator = random.choice(queue_list)
@@ -61,14 +61,24 @@ async def send_is_full_message(interaction, client, clear_queue, queue_list, mod
 
     member = interaction.guild.get_member(game_creator)
     if member:
-        await member.send("Vous avez été désigné comme créateur de partie, à vous !")
+        bot_permissions = interaction.guild.me.permissions_in(member)
+        if bot_permissions.send_messages:
+            await member.send("Vous avez été désigné comme créateur de partie, à vous !")
+        else:
+            clear_queue(queue_list)
+            await interaction.response.send_message(f"{member.mention} ne peut pas recevoir de messages privés.")
 
     logs = generate_log()
 
     for user_id in queue_list:
         member = interaction.guild.get_member(user_id)
         if member:
-            await member.send(str(logs))
+            bot_permissions = interaction.guild.me.permissions_in(member)
+            if bot_permissions.send_messages:
+                await member.send(str(logs))
+            else:
+                clear_queue(queue_list)
+                await interaction.response.send_message(f"{member.mention} ne peut pas recevoir de messages privés.")
 
     random.shuffle(queue_list)
 
@@ -82,7 +92,7 @@ async def send_is_full_message(interaction, client, clear_queue, queue_list, mod
     embed.add_field(name="Équipe Rouge: ", value=team_red_mentions, inline=False)
     embed.add_field(name="Équipe Bleue: ", value=team_blue_mentions, inline=False)
 
-
     await interaction.followup.send(embed=embed)
     await clear_queue(queue_list)
+
 
